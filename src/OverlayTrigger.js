@@ -100,6 +100,26 @@ const defaultProps = {
   trigger: ['hover', 'focus'],
 };
 
+const css = (node, property) => window.getComputedStyle(node).getPropertyValue(property);
+
+const getScrollParent = node => {
+  const position = css(node, 'position');
+  const excludeStaticParent = position === 'absolute';
+  const overflowRegex = /(auto|scroll)/;
+
+  const parent = node.parentNode;
+
+  if ( excludeStaticParent && css(parent, 'position' ) === 'static' ) {
+    return getScrollParent(parent);
+  }
+
+  if (overflowRegex.test(css(parent, 'overflow' ) + css(parent, 'overflow-y' ) + css(parent, 'overflow-x' ) )) {
+    return parent;
+  }
+
+  return document;
+};
+
 class OverlayTrigger extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -126,6 +146,8 @@ class OverlayTrigger extends React.Component {
   componentDidMount() {
     this._mountNode = document.createElement('div');
     this.renderOverlay();
+    const scrollableNode = getScrollParent(ReactDOM.findDOMNode(this));
+    scrollableNode.addEventListener('scroll', this.handleDelayedHide);
   }
 
   componentDidUpdate() {
@@ -138,6 +160,8 @@ class OverlayTrigger extends React.Component {
 
     clearTimeout(this._hoverShowDelay);
     clearTimeout(this._hoverHideDelay);
+    const scrollableNode = getScrollParent(ReactDOM.findDOMNode(this));
+    scrollableNode.removeEventListener('scroll', this.handleDelayedHide);
   }
 
   handleToggle() {
