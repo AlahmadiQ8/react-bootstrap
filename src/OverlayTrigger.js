@@ -146,8 +146,8 @@ class OverlayTrigger extends React.Component {
   componentDidMount() {
     this._mountNode = document.createElement('div');
     this.renderOverlay();
-    const scrollableNode = getScrollParent(ReactDOM.findDOMNode(this));
-    scrollableNode.addEventListener('scroll', this.handleDelayedHide);
+    this.scrollableNode = getScrollParent(ReactDOM.findDOMNode(this));
+    this.scrollableNode.addEventListener('scroll', this.handleDelayedHide);
   }
 
   componentDidUpdate() {
@@ -160,8 +160,7 @@ class OverlayTrigger extends React.Component {
 
     clearTimeout(this._hoverShowDelay);
     clearTimeout(this._hoverHideDelay);
-    const scrollableNode = getScrollParent(ReactDOM.findDOMNode(this));
-    scrollableNode.removeEventListener('scroll', this.handleDelayedHide);
+    this.scrollableNode.removeEventListener('scroll', this.handleDelayedHide);
   }
 
   handleToggle() {
